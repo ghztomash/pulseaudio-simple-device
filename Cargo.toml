@@ -6,3 +6,12 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+anyhow = "1.0.75"
+
+[dependencies.pulse]
+version = "2.28.1"
+package = "libpulse-binding"
+
+[dependencies.psimple]
+version = "2.28.1"
+package = "libpulse-simple-binding"
