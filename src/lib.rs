@@ -1,6 +1,6 @@
-mod config;
-mod device;
-mod stream;
+pub mod config;
+pub mod device;
+pub mod stream;
 
 #[cfg(test)]
 mod tests {

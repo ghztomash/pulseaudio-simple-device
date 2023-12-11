@@ -23,13 +23,13 @@ impl Stream {
         }
     }
 
-    pub fn play(&mut self) {
+    pub fn play(&self) {
         if let Some(sender) = self.thread_channel_sender.as_ref() {
             sender.send(Command::Play).unwrap();
         }
     }
 
-    pub fn pause(&mut self) {
+    pub fn pause(&self) {
         if let Some(sender) = self.thread_channel_sender.as_ref() {
             sender.send(Command::Pause).unwrap();
         }
