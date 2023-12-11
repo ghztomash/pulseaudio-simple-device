@@ -9,9 +9,9 @@ mod tests {
     #[test]
     fn constructor_tests() {
         let config = config::Config::default();
-        let device = device::Device::new(config);
-        let stream = device.build_output_stream();
+        let device = device::Device::new("test".to_string());
+        let _stream = device.build_output_stream(&config, None, None).unwrap();
 
-        assert_eq!(1, 1);
+        assert!(true);
     }
 }

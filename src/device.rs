@@ -1,3 +1,4 @@
+use anyhow::{Error, Result};
 use psimple::Simple;
 use pulse::sample::{Format, Spec};
 use pulse::stream::Direction;
@@ -5,45 +6,83 @@ use pulse::stream::Direction;
 use std::sync::mpsc;
 use std::thread;
 
-use crate::stream::Stream;
+use crate::config::Config;
+use crate::stream::{Command, Stream};
 
 pub struct Device {
-    name: String,
-    spec: Spec,
+    application_name: String,
 }
 
 impl Device {
-    pub fn new(name: String, spec: Spec) -> Self {
-        Device { name, spec }
+    pub fn new(application_name: String) -> Self {
+        Device { application_name }
     }
 
-    pub fn build_output_stream<T, E>(&mut self, data_callback: T, error_callback: E) -> Stream {
-        let (thread_channel_sender, thread_channel_receiver) = mpsc::channel();
+    pub fn build_output_stream(
+        &self,
+        config: &Config,
+        data_callback: Option<fn(&mut [f32])>,
+        error_callback: Option<fn(&mut Error)>,
+    ) -> Result<Stream> {
+        let (thread_channel_tx, thread_channel_rx) = mpsc::channel();
 
         let spec = Spec {
             format: Format::F32le,
-            channels: 2,
-            rate: 44100,
+            channels: config.channels,
+            rate: config.sample_rate,
         };
         assert!(spec.is_valid());
 
         let s = Simple::new(
-            None,                // Use the default server
-            "FooApp",            // Our application’s name
-            Direction::Playback, // We want a playback stream
-            None,                // Use the default device
-            "samples",           // Description of our stream
-            &spec,               // Our sample format
-            None,                // Use default channel map
-            None,                // Use default buffering attributes
-        )
-        .unwrap();
+            None,                   // Use the default server
+            &self.application_name, // Our application’s name
+            Direction::Playback,    // We want a playback stream
+            None,                   // Use the default device
+            "samples",              // Description of our stream
+            &spec,                  // Our sample format
+            None,                   // Use default channel map
+            None,                   // Use default buffering attributes
+        )?;
 
-        let audio_thread = thread::spawn(move || loop {
-            thread_channel_receiver.recv().unwrap();
-            println!("Audio thread received message");
+        let mut buffer = vec![0f32; config.buffer_size];
+
+        let audio_thread = thread::spawn(move || {
+            println!("audio_thread started!");
+
+            let mut paused = true;
+            let data;
+
+            loop {
+                // loop until we get an exit signal
+                match thread_channel_rx.try_recv() {
+                    Ok(Command::Quit) | Err(mpsc::TryRecvError::Disconnected) => {
+                        break;
+                    }
+                    Ok(Command::Play) => {
+                        paused = false;
+                    }
+                    Ok(Command::Pause) => {
+                        paused = true;
+                    }
+                    Err(_) => {}
+                }
+            }
+
+            if paused {
+                buffer.fill(0f32);
+            } else {
+            }
+
+            data = buffer
+                .iter()
+                .flat_map(|v| v.to_le_bytes().to_vec())
+                .collect::<Vec<u8>>();
+            s.write(&data).unwrap();
+
+            s.drain().unwrap();
+            println!("audio_thread done!");
         });
 
-        Stream::new(Some(audio_thread), Some(thread_channel_sender))
+        Ok(Stream::new(Some(audio_thread), Some(thread_channel_tx)))
     }
 }
