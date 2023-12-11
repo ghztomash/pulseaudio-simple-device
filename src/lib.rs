@@ -1,6 +1,5 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
+mod device;
+mod stream;
 
 #[cfg(test)]
 mod tests {
@@ -8,7 +7,6 @@ mod tests {
 
     #[test]
     fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
+        assert_eq!(1, 1);
     }
 }
