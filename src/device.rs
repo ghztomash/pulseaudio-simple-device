@@ -18,12 +18,15 @@ impl Device {
         Device { application_name }
     }
 
-    pub fn build_output_stream(
+    pub fn build_output_stream<E>(
         &self,
         config: &Config,
         data_callback: Option<fn(&mut [f32])>,
-        error_callback: Option<fn(&mut Error)>,
-    ) -> Result<Stream> {
+        mut error_callback: E,
+    ) -> Result<Stream>
+    where
+        E: FnMut(Error) + Send + 'static,
+    {
         let (thread_channel_tx, thread_channel_rx) = mpsc::channel();
 
         let spec = Spec {
@@ -50,7 +53,7 @@ impl Device {
             println!("audio_thread started!");
 
             let mut paused = true;
-            let data;
+            let mut data;
 
             loop {
                 // loop until we get an exit signal
@@ -66,20 +69,29 @@ impl Device {
                     }
                     Err(_) => {}
                 }
+
+                if paused {
+                    buffer.fill(0f32);
+                } else {
+                }
+
+                // convert the buffer to a byte array
+                data = buffer
+                    .iter()
+                    .flat_map(|v| v.to_le_bytes().to_vec())
+                    .collect::<Vec<u8>>();
+
+                // write the data to the stream
+                if let Err(err) = s.write(&data) {
+                    error_callback(err.into());
+                }
             }
 
-            if paused {
-                buffer.fill(0f32);
-            } else {
+            // drain the stream
+            if let Err(err) = s.drain() {
+                error_callback(err.into());
             }
 
-            data = buffer
-                .iter()
-                .flat_map(|v| v.to_le_bytes().to_vec())
-                .collect::<Vec<u8>>();
-            s.write(&data).unwrap();
-
-            s.drain().unwrap();
             println!("audio_thread done!");
         });
 
