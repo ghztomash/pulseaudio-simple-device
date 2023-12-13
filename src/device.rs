@@ -18,6 +18,7 @@ impl Device {
         Device { application_name }
     }
 
+    /// Build an output stream with the given configuration.
     pub fn build_output_stream<D, E>(
         &self,
         config: &Config,
