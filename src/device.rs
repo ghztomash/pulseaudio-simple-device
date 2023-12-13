@@ -18,13 +18,14 @@ impl Device {
         Device { application_name }
     }
 
-    pub fn build_output_stream<E>(
+    pub fn build_output_stream<D, E>(
         &self,
         config: &Config,
-        data_callback: Option<fn(&mut [f32])>,
+        mut data_callback: D,
         mut error_callback: E,
     ) -> Result<Stream>
     where
+        D: FnMut(&mut [f32]) + Send + 'static,
         E: FnMut(Error) + Send + 'static,
     {
         let (thread_channel_tx, thread_channel_rx) = mpsc::channel();
@@ -73,6 +74,7 @@ impl Device {
                 if paused {
                     buffer.fill(0f32);
                 } else {
+                    data_callback(&mut buffer);
                 }
 
                 // convert the buffer to a byte array

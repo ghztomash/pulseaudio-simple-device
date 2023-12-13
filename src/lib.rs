@@ -11,8 +11,12 @@ mod tests {
         let config = config::Config::default();
         let device = device::Device::new("test".to_string());
 
-        let err_fn = |err| eprintln!("an error occurred on stream: {}", err);
-        let _stream = device.build_output_stream(&config, None, err_fn).unwrap();
+        let err_fn = |_| {};
+        let data_fn = |_: &mut [f32]| {};
+
+        let _stream = device
+            .build_output_stream(&config, data_fn, err_fn)
+            .unwrap();
 
         assert!(true);
     }
