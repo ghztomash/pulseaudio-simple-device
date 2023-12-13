@@ -1,3 +1,4 @@
+use anyhow::{Error, Result};
 use std::sync::mpsc;
 use std::thread;
 
@@ -23,16 +24,18 @@ impl Stream {
         }
     }
 
-    pub fn play(&self) {
+    pub fn play(&self) -> Result<()> {
         if let Some(sender) = self.thread_channel_sender.as_ref() {
-            sender.send(Command::Play).unwrap();
+            sender.send(Command::Play)?;
         }
+        Ok(())
     }
 
-    pub fn pause(&self) {
+    pub fn pause(&self) -> Result<()> {
         if let Some(sender) = self.thread_channel_sender.as_ref() {
-            sender.send(Command::Pause).unwrap();
+            sender.send(Command::Pause)?;
         }
+        Ok(())
     }
 }
 
