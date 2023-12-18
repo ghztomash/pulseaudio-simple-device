@@ -75,20 +75,14 @@ fn main() -> Result<()> {
     loop {
         let input = stdin().lines().next().unwrap().unwrap();
         match input.trim() {
-            "f" => {
-                osc.lock().unwrap().set_frequency(880.0);
-            }
-            "a" => {
-                osc.lock().unwrap().set_amplitude(0.5);
-            }
-            "q" => {
-                println!("got q, exiting...");
-                break;
-            }
+            "f" => osc.lock().unwrap().set_frequency(880.0),
+            "a" => osc.lock().unwrap().set_amplitude(0.5),
+            "q" => break,
             _ => {}
         }
     }
 
+    println!("bye...");
     stream.pause()?;
     drop(stream);
     Ok(())
