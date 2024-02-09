@@ -2,6 +2,7 @@ use anyhow::Result;
 use std::sync::mpsc;
 use std::thread;
 
+#[derive(Debug, Default)]
 pub struct Stream {
     audio_thread: Option<thread::JoinHandle<()>>,
     thread_channel_sender: Option<mpsc::Sender<Command>>,
