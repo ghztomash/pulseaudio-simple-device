@@ -67,7 +67,7 @@ fn main() -> Result<()> {
         }
     };
 
-    let stream = device.build_output_stream(&config, data_fn, err_fn)?;
+    let stream = device.build_output_stream(&config, data_fn, err_fn, None)?;
     stream.play()?;
 
     // wait for user input

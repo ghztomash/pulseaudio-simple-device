@@ -5,6 +5,7 @@ use pulse::stream::Direction;
 
 use std::sync::mpsc;
 use std::thread;
+use std::time::Duration;
 
 use crate::config::Config;
 use crate::stream::{Command, Stream};
@@ -24,6 +25,7 @@ impl Device {
         config: &Config,
         mut data_callback: D,
         mut error_callback: E,
+        _: Option<Duration>,
     ) -> Result<Stream>
     where
         D: FnMut(&mut [f32]) + Send + 'static,

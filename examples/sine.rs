@@ -26,7 +26,7 @@ fn main() -> Result<()> {
         }
     };
 
-    let stream = device.build_output_stream(&config, data_fn, err_fn)?;
+    let stream = device.build_output_stream(&config, data_fn, err_fn, None)?;
     stream.play()?;
 
     thread::sleep(Duration::from_secs(2));

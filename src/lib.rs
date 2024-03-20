@@ -15,7 +15,7 @@ mod tests {
         let data_fn = |_: &mut [f32]| {};
 
         let _stream = device
-            .build_output_stream(&config, data_fn, err_fn)
+            .build_output_stream(&config, data_fn, err_fn, None)
             .unwrap();
 
         assert!(true);
